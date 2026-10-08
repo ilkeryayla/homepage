@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ilker Yayla</title>
+<meta name="description" content="Ilker Yayla's daily scoreboard for Wordle, Connections and Sudoku.">
+<link rel="canonical" href="https://ilkeryayla.com/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ilkeryayla.com/">
+<meta property="og:title" content="Ilker Yayla">
+<meta property="og:description" content="A daily scoreboard for Wordle, Connections and Sudoku.">
+<meta property="og:image" content="https://ilkeryayla.com/meadow.jpg">
+<meta name="theme-color" content="#F3F4F1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%23F3F4F1'/%3E%3Cg fill='%23C9CDD2'%3E%3Crect x='13' y='13' width='11' height='11' rx='2'/%3E%3Crect x='26.5' y='13' width='11' height='11' rx='2'/%3E%3Crect x='40' y='13' width='11' height='11' rx='2'/%3E%3Crect x='13' y='26.5' width='11' height='11' rx='2'/%3E%3C/g%3E%3Crect x='26.5' y='26.5' width='11' height='11' rx='2' fill='%23C9B458'/%3E%3Cg fill='%236AAA64'%3E%3Crect x='40' y='26.5' width='11' height='11' rx='2'/%3E%3Crect x='13' y='40' width='11' height='11' rx='2'/%3E%3Crect x='26.5' y='40' width='11' height='11' rx='2'/%3E%3Crect x='40' y='40' width='11' height='11' rx='2'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preload" as="image" href="meadow.jpg">
+<link rel="preload" as="font" type="font/woff2" href="bricolage-grotesque.woff2" crossorigin>
+<!--
+  Everything on this page is computed from log.json, which sits next to this file.
+  README.md explains the format and how to add a day.
+-->
+<script>
+// Pick the theme before the page paints: the visitor's own choice if they made
+// one with the header button, otherwise whatever their system is set to.
+(function () {
+  var pick = null;
+  try { pick = localStorage.getItem('theme'); } catch (e) {}
+  var dark = pick === 'dark' || (pick !== 'light' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+})();
+</script>
+<style>
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("bricolage-grotesque.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+:root {
+  --bg: #F3F4F1;
+  --ink: #15181B;
+  --muted: #565D64;
+  --rule: rgb(21 24 27 / 0.12);
+  --bar: #737A75;
+  --accent: #2F6FEB;
+  --hover: rgb(21 24 27 / 0.06);
+  /* Glass panels */
+  --glass: rgb(255 255 255 / 0.68);
+  --glass-edge: rgb(255 255 255 / 0.7);
+  --glass-shine: rgb(255 255 255 / 0.6);
+  --glass-shadow: rgb(21 24 27 / 0.22);
+  --solid: #FBFBFA;
+  --sheen: rgb(255 255 255 / 0.6);
+  --edge-hot: rgb(255 255 255 / 1);
+  /* Photo: the wash over it and the colour it fades into */
+  --haze: 243 244 241;
+  --dim: rgb(15 17 19 / 0);
+  --photo-h: min(133.33vw, 1100px);
+  /* Segmented control in the header */
+  --seg-track: rgb(255 255 255 / 0.62);
+  --seg-thumb: #FFFFFF;
+  --seg-thumb-shadow: 0 1px 2px rgb(21 24 27 / 0.14), 0 4px 10px -2px rgb(21 24 27 / 0.18), inset 0 0 0 0.5px rgb(21 24 27 / 0.05);
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #0F1113;
+  --ink: #ECEEEA;
+  --muted: #BDC3C0;
+  --rule: rgb(255 255 255 / 0.12);
+  --bar: #9AA19D;
+  --hover: rgb(255 255 255 / 0.08);
+  --glass: rgb(15 17 19 / 0.7);
+  --glass-edge: rgb(255 255 255 / 0.14);
+  --glass-shine: rgb(255 255 255 / 0.12);
+  --glass-shadow: rgb(0 0 0 / 0.6);
+  --solid: #1A1D20;
+  --sheen: rgb(255 255 255 / 0.1);
+  --edge-hot: rgb(255 255 255 / 0.6);
+  --haze: 15 17 19;
+  --dim: rgb(15 17 19 / 0.55);
+  --seg-track: rgb(30 33 36 / 0.7);
+  --seg-thumb: rgb(255 255 255 / 0.2);
+  --seg-thumb-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18), 0 4px 10px -2px rgb(0 0 0 / 0.5);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 1.0625rem/1.45 "Bricolage Grotesque", "Helvetica Neue", sans-serif;
+}
+p { margin: 0; }
+a { color: inherit; }
+a:focus-visible, button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+h2 { margin: 0; font-size: 1.375rem; line-height: 1.2; font-weight: 700; letter-spacing: -0.01em; }
+.muted { color: var(--muted); }
+.wrap { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding: 12px 20px 0; }
+
+/* Photo: full width, clear in its top third and fading into the page colour below.
+   It stays put for the first 520px of scrolling, then leaves with the page. */
+.backdrop { position: absolute; inset: 0; z-index: 0; overflow: hidden; overflow: clip; pointer-events: none; }
+.backdrop .track { height: calc(var(--photo-h) + 520px); }
+.backdrop .pin { position: sticky; top: 0; height: var(--photo-h); }
+.photo, .haze { position: absolute; inset: 0; }
+.photo { background: var(--bg) url("meadow.jpg") center min(0px, calc(500px - 40vw)) / 100% auto no-repeat; }
+.haze {
+  background:
+    linear-gradient(to bottom, rgb(var(--haze) / 0) 33.3%, rgb(var(--haze)) 100%),
+    linear-gradient(var(--dim), var(--dim));
+}
+/* Phones: a wash behind the headline, and the fade finishes before the photo's bottom edge. */
+@media (max-width: 700px) {
+  .haze {
+    background:
+      linear-gradient(to bottom, rgb(var(--haze) / 0.6) 0, rgb(var(--haze) / 0.5) 300px, rgb(var(--haze) / 0) 480px),
+      linear-gradient(to bottom, rgb(var(--haze) / 0) 26%, rgb(var(--haze) / 0.3) 42%, rgb(var(--haze) / 0.62) 56%, rgb(var(--haze) / 0.86) 68%, rgb(var(--haze) / 0.97) 78%, rgb(var(--haze)) 86%),
+      linear-gradient(var(--dim), var(--dim));
+  }
+}
+@media (min-width: 701px) and (max-width: 1000px) {
+  .haze {
+    background:
+      linear-gradient(to bottom, rgb(var(--haze) / 0.65) 0, rgb(var(--haze) / 0.55) 380px, rgb(var(--haze) / 0) 560px),
+      linear-gradient(to bottom, rgb(var(--haze) / 0) 33.3%, rgb(var(--haze)) 100%),
+      linear-gradient(var(--dim), var(--dim));
+  }
+}
+
+/* Glass: translucent, blurred, with a highlight that follows the pointer or the scroll position.
+   In Chromium browsers the script below swaps the blur for a lens that also bends the photo
+   near each panel's rim; it does so by setting --bf. */
+.glass {
+  position: relative;
+  isolation: isolate;
+  background: var(--glass);
+  border: 1px solid var(--glass-edge);
+  box-shadow: inset 0 1px 0 var(--glass-shine), 0 30px 60px -30px var(--glass-shadow);
+  -webkit-backdrop-filter: var(--bf, blur(28px) saturate(1.6));
+  backdrop-filter: var(--bf, blur(28px) saturate(1.6));
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.5s ease;
+  animation: glass-in 0.9s cubic-bezier(0.2, 0.9, 0.3, 1.15) backwards;
+}
+.glass::before, .glass::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.glass::before {
+  inset: 0;
+  background: radial-gradient(circle 380px at var(--mx, 30%) var(--my, calc(-30% + var(--sy, 0) * 160%)), var(--sheen), transparent 70%);
+  opacity: var(--lit, 0.6);
+}
+.glass::after {
+  inset: -1px;
+  padding: 1px;
+  background: radial-gradient(circle 300px at var(--mx, 30%) var(--my, calc(-30% + var(--sy, 0) * 160%)), var(--edge-hot), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: var(--lit, 0.7);
+}
+.game.glass:hover, .about.glass:hover { transform: translateY(-4px) scale(1.012); box-shadow: inset 0 1px 0 var(--glass-shine), 0 44px 70px -30px var(--glass-shadow); }
+.game.glass:active, .about.glass:active { transform: scale(0.985); }
+@keyframes glass-in { from { opacity: 0; transform: translateY(18px) scale(0.96); } }
+
+/* Header: a segmented control whose thumb marks the section in view, plus the theme button. */
+.segmented {
+  position: sticky;
+  top: 12px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--seg-track);
+  -webkit-backdrop-filter: var(--bf, blur(10px) saturate(1.6));
+  backdrop-filter: var(--bf, blur(10px) saturate(1.6));
+  transform: scale(calc(1 - 0.06 * var(--compact, 0)));
+}
+.segmented nav { position: relative; flex: 1 1 auto; min-width: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 112px)); }
+.thumb {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(100% / 3);
+  border-radius: 999px;
+  background: var(--seg-thumb);
+  box-shadow: var(--seg-thumb-shadow);
+  transition: transform 0.5s cubic-bezier(0.3, 1.4, 0.5, 1), scale 0.25s ease;
+}
+nav[data-active="numbers"] .thumb { transform: translateX(100%); }
+nav[data-active="about"] .thumb { transform: translateX(200%); }
+.segmented nav:active .thumb { scale: 0.94; }
+.seg {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: clamp(0.875rem, 3.9vw, 1.0625rem);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: font-weight 0.2s ease;
+}
+.seg[aria-current="true"] { font-weight: 700; }
+.segmented .divider { flex: none; width: 1px; height: 24px; margin: 0 4px; background: var(--rule); }
+
+/* Theme button: a moon while the page is light, a sun while it is dark. */
+.mode {
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease;
+}
+.mode:hover { background: var(--hover); }
+.mode:active { transform: scale(0.88); }
+.mode i { position: absolute; left: 50%; top: 50%; border-radius: 50%; transition: opacity 0.35s ease, transform 0.5s cubic-bezier(0.3, 1.4, 0.5, 1); }
+.mode .moon { width: 18px; height: 18px; margin: -9px 0 0 -9px; box-shadow: inset 5px -5px 0 0 currentColor; transform: rotate(-8deg); }
+.mode .sun {
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  background: currentColor;
+  box-shadow: 0 -8px 0 -2.75px currentColor, 5.7px -5.7px 0 -2.75px currentColor, 8px 0 0 -2.75px currentColor, 5.7px 5.7px 0 -2.75px currentColor, 0 8px 0 -2.75px currentColor, -5.7px 5.7px 0 -2.75px currentColor, -8px 0 0 -2.75px currentColor, -5.7px -5.7px 0 -2.75px currentColor;
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.4);
+}
+[data-theme="dark"] .mode .moon { opacity: 0; transform: rotate(90deg) scale(0.4); }
+[data-theme="dark"] .mode .sun { opacity: 1; transform: none; }
+
+.hero { display: flex; flex-direction: column; align-items: center; gap: 20px; min-height: 600px; padding: 88px 0 72px; text-align: center; }
+.hero h1 { margin: 0; font-size: clamp(2.5rem, 6.2vw, 5rem); line-height: 1.02; font-weight: 700; letter-spacing: -0.03em; text-wrap: balance; }
+.hero h1 span { display: block; }
+
+.games { display: flex; flex-wrap: wrap; gap: 20px; scroll-margin-top: 92px; }
+.game { flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 20px; padding: 28px; border-radius: 28px; }
+.game:nth-child(1) { animation-delay: 120ms; }
+.game:nth-child(2) { animation-delay: 200ms; }
+.game:nth-child(3) { animation-delay: 280ms; }
+.game header { display: flex; flex-direction: column; gap: 12px; min-height: 7.75rem; }
+.game .title { display: flex; align-items: center; gap: 14px; }
+
+/* App-style icons beside each game title. */
+.appicon {
+  position: relative;
+  flex: none;
+  width: 52px;
+  height: 52px;
+  padding: 10px;
+  overflow: hidden;
+  border-radius: 23%;
+  background: linear-gradient(160deg, #FFFFFF, #E2E5E0);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), inset 0 0 0 1px rgb(21 24 27 / 0.06), 0 8px 16px -8px rgb(21 24 27 / 0.45), 0 1px 2px rgb(21 24 27 / 0.12);
+}
+.appicon::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(to bottom, rgb(255 255 255 / 0.28), rgb(255 255 255 / 0) 52%); }
+@supports (corner-shape: squircle) {
+  .appicon { corner-shape: squircle; border-radius: 36%; }
+}
+.appicon .cells { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; width: 100%; height: 100%; }
+.appicon .cells i { display: grid; place-items: center; border-radius: 2px; background: #C9CDD2; font: 800 8px/1 "Bricolage Grotesque", sans-serif; color: #FFFFFF; }
+.appicon .cells .y { background: #C9B458; }
+.appicon .cells .g { background: #6AAA64; }
+.appicon .cells .n { background: #2F3B52; }
+.appicon .rows { display: flex; flex-direction: column; gap: 2px; width: 100%; height: 100%; }
+.appicon .rows i { flex: 1; border-radius: 2.5px; }
+
+.chart { display: flex; flex-direction: column; justify-content: flex-end; height: 150px; font-variant-numeric: tabular-nums; }
+
+.bars { gap: 10px; font-size: 0.8125rem; line-height: 14px; }
+.bars .row { display: flex; align-items: center; gap: 10px; }
+.bars .key { flex: none; color: var(--muted); }
+.bars .track { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; padding-right: 40px; }
+.bars .bar { flex: none; height: 14px; min-width: 3px; border-radius: 0 4px 4px 0; background: var(--bar); }
+.bars .bar.now { background: var(--accent); }
+
+.cols { gap: 8px; font-size: 0.75rem; line-height: 12px; }
+.cols .plotrow { display: flex; gap: 8px; }
+.cols .ticks { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; width: 26px; height: 132px; margin: -6px 0; color: var(--muted); }
+.cols .plot { position: relative; flex: 1; min-width: 0; height: 120px; }
+.cols .grid { position: absolute; left: 0; right: 0; height: 1px; background: var(--rule); }
+.cols .grid.base { bottom: 0; background: var(--bar); }
+.cols .columns { position: absolute; inset: 0; display: flex; align-items: flex-end; }
+.cols .col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.cols .col .bar { width: 20px; border-radius: 4px 4px 0 0; background: var(--bar); }
+.cols .col.now .bar { background: var(--accent); }
+.cols .col .val { font-size: 0.8125rem; font-weight: 600; }
+.cols .days { display: flex; padding-left: 34px; color: var(--muted); }
+.cols .days span { flex: 1; text-align: center; }
+.cols .days .now { color: var(--ink); }
+
+dl { margin: 0; }
+dl div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-top: 1px solid var(--rule); }
+dl div:last-child { padding-bottom: 0; }
+dt { color: var(--muted); }
+dd { margin: 0; font-variant-numeric: tabular-nums; }
+
+/* Between three-across and phone width the panels stack in one centred column. */
+@media (min-width: 620px) and (max-width: 919px) {
+  .games > .game { flex-basis: 100%; max-width: 560px; margin-left: auto; margin-right: auto; }
+}
+@media (max-width: 919px) {
+  .game header { min-height: 0; }
+  .chart { height: auto; margin-top: 4px; }
+}
+
+.about { display: flex; flex-direction: column; gap: 16px; max-width: 46rem; margin: 72px auto 0; padding: 36px; border-radius: 28px; scroll-margin-top: 92px; animation-delay: 360ms; }
+.about p { font-size: 1.25rem; line-height: 1.4; }
+.links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+.links a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border: 1px solid var(--ink); border-radius: 999px; text-decoration: none; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease; }
+.links a:hover { background: var(--hover); }
+.links a:active { transform: scale(0.94); }
+
+footer { padding: 40px 0 48px; font-size: 0.875rem; text-align: center; color: var(--muted); }
+
+/* Solid panels where blur is unsupported or the visitor asks for less transparency. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass { background: var(--solid); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass, .segmented { background: var(--solid); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .glass, .thumb, .seg, .links a, .mode, .mode i { animation: none; transition: none; }
+  .game.glass:hover, .about.glass:hover, .game.glass:active, .about.glass:active, .segmented, .links a:active, .mode:active { transform: none; }
+  .segmented nav:active .thumb { scale: 1; }
+}
+</style>
+</head>
+<body id="top">
+<div class="backdrop" aria-hidden="true"><div class="track"><div class="pin"><div class="photo"></div><div class="haze"></div></div></div></div>
+<div class="wrap">
+
+<header class="segmented glass">
+  <nav aria-label="Sections" data-active="top">
+    <div class="thumb" aria-hidden="true"></div>
+    <a class="seg" data-seg="top" href="#top" aria-current="true">Ilker Yayla</a>
+    <a class="seg" data-seg="numbers" href="#numbers" aria-current="false">Numbers</a>
+    <a class="seg" data-seg="about" href="#about" aria-current="false">About</a>
+  </nav>
+  <span class="divider" aria-hidden="true"></span>
+  <button class="mode" type="button" aria-label="Switch to dark mode" title="Switch to dark mode"><i class="moon" aria-hidden="true"></i><i class="sun" aria-hidden="true"></i></button>
+</header>
+
+<main>
+<section class="hero">
+  <h1 id="headline">Loading the puzzle log</h1>
+  <p id="updated"></p>
+  <noscript><p>This page needs JavaScript to read the puzzle log.</p></noscript>
+</section>
+
+<section id="numbers" class="games">
+  <article class="game glass" id="wordle"></article>
+  <article class="game glass" id="connections"></article>
+  <article class="game glass" id="sudoku"></article>
+</section>
+
+<section id="about" class="about glass">
+  <h2>About</h2>
+  <p>I'm Ilker. I look after servers for a living and do the same three puzzles most days. Every number on this page comes from one file that I update each evening.</p>
+  <!-- To add links, remove this comment's two marker lines and put in your own addresses.
+  <div class="links">
+    <a href="https://github.com/YOUR-USERNAME">GitHub</a>
+    <a href="mailto:YOUR-ADDRESS">Email</a>
+  </div>
+  -->
+</section>
+</main>
+
+<footer><span id="year"></span> Ilker Yayla</footer>
+
+</div>
+
+<!-- Icons shown beside each game title. They are copied into the panels by the script below. -->
+<template id="icon-wordle"><div class="appicon" aria-hidden="true"><div class="cells"><i></i><i></i><i></i><i></i><i class="y"></i><i class="g"></i><i class="g"></i><i class="g"></i><i class="g"></i></div></div></template>
+<template id="icon-connections"><div class="appicon" aria-hidden="true"><div class="rows"><i style="background:#F9DF6D"></i><i style="background:#A0C35A"></i><i style="background:#B0C4EF"></i><i style="background:#BA81C5"></i></div></div></template>
+<template id="icon-sudoku"><div class="appicon" aria-hidden="true"><div class="cells"><i class="n">5</i><i></i><i class="n">3</i><i></i><i class="n">7</i><i></i><i class="n">6</i><i></i><i class="n">9</i></div></div></template>
+
+<script>
+// ---------- Page behaviour: theme, segmented header, glass highlights and refraction ----------
+(function () {
+  // Set to false to keep plain blurred glass in every browser.
+  const REFRACTION = true;
+
+  const root = document.documentElement;
+  const nav = document.querySelector('.segmented nav');
+  const segs = [...nav.querySelectorAll('.seg')];
+  const media = (query) => window.matchMedia ? window.matchMedia(query) : { matches: false };
+
+  // ----- Theme -----
+  // The page follows the system setting. The header button overrides it, and the
+  // choice is kept in this browser until the button brings the page back in line
+  // with the system.
+  const scheme = media('(prefers-color-scheme: dark)');
+  const system = () => scheme.matches ? 'dark' : 'light';
+  const button = document.querySelector('.mode');
+  let picked = null;
+  try { const saved = localStorage.getItem('theme'); if (saved === 'dark' || saved === 'light') picked = saved; } catch (e) {}
+
+  function show(theme) {
+    root.dataset.theme = theme;
+    const label = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+    button.setAttribute('aria-label', label);
+    button.title = label;
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = theme === 'dark' ? '#0F1113' : '#F3F4F1';
+  }
+  show(picked || system());
+  if (scheme.addEventListener) scheme.addEventListener('change', () => show(picked || system()));
+
+  button.addEventListener('click', () => {
+    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    picked = next === system() ? null : next;
+    try { if (picked) localStorage.setItem('theme', picked); else localStorage.removeItem('theme'); } catch (e) {}
+    // Where the browser supports it, the whole page cross-fades between the two themes.
+    if (document.startViewTransition && !media('(prefers-reduced-motion: reduce)').matches) document.startViewTransition(() => show(next));
+    else show(next);
+  });
+
+  // ----- Segmented header -----
+  let active = 'top', lockUntil = 0, timer;
+
+  function select(name) {
+    active = name;
+    nav.dataset.active = name;
+    segs.forEach((a) => a.setAttribute('aria-current', a.dataset.seg === name ? 'true' : 'false'));
+  }
+
+  function onScroll() {
+    const y = Math.max(0, window.scrollY);
+    const max = Math.max(1, root.scrollHeight - window.innerHeight);
+    // The highlight on every glass panel drifts with the scroll position, and the header tightens once the page has moved.
+    root.style.setProperty('--sy', Math.min(1, y / max).toFixed(3));
+    root.style.setProperty('--compact', y > 40 ? '1' : '0');
+    // The selected segment follows the section in view, except just after a click.
+    if (Date.now() < lockUntil) return;
+    const topOf = (id) => document.getElementById(id).getBoundingClientRect().top;
+    const line = window.innerHeight * 0.55;
+    let next = 'top';
+    if (root.scrollHeight > window.innerHeight + 2 && y > 0) {
+      if (y >= max - 2 || topOf('about') < line) next = 'about';
+      else if (topOf('numbers') < line) next = 'numbers';
+    }
+    if (next !== active) select(next);
+  }
+
+  // A click selects its segment at once; the scroll that follows must not move the thumb back.
+  segs.forEach((a) => a.addEventListener('click', () => {
+    lockUntil = Date.now() + 900;
+    select(a.dataset.seg);
+    clearTimeout(timer);
+    timer = setTimeout(onScroll, 950);
+  }));
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+  // ----- Glass highlight -----
+  // The highlight follows the pointer while it is over a panel.
+  const panels = [...document.querySelectorAll('.glass')];
+  panels.forEach((panel) => {
+    panel.addEventListener('pointermove', (e) => {
+      const box = panel.getBoundingClientRect();
+      panel.style.setProperty('--mx', (e.clientX - box.left) + 'px');
+      panel.style.setProperty('--my', (e.clientY - box.top) + 'px');
+      panel.style.setProperty('--lit', '1');
+    });
+    panel.addEventListener('pointerleave', () => {
+      panel.style.removeProperty('--mx');
+      panel.style.removeProperty('--my');
+      panel.style.removeProperty('--lit');
+    });
+  });
+
+  // ----- Refraction -----
+  // A displacement map for one rounded panel: neutral grey in the middle, and
+  // towards the rim the red and green channels push sampling back into the panel,
+  // which bends the photo the way a thick glass edge does.
+  function lensMap(w, h, radius, bezel) {
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    const img = ctx.createImageData(w, h);
+    const px = img.data;
+    const hw = w / 2, hh = h / 2;
+    for (let j = 0; j < h; j++) {
+      for (let i = 0; i < w; i++) {
+        const x = i + 0.5 - hw, y = j + 0.5 - hh;
+        const qx = Math.abs(x) - hw + radius, qy = Math.abs(y) - hh + radius;
+        const dist = Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - radius;
+        if (dist > 0.5) continue;
+        let nx = 0, ny = 0;
+        if (qx > 0 && qy > 0) { const len = Math.hypot(qx, qy) || 1; nx = qx / len * Math.sign(x); ny = qy / len * Math.sign(y); }
+        else if (qx > qy) nx = Math.sign(x);
+        else ny = Math.sign(y);
+        const t = Math.max(0, Math.min(1, 1 + dist / bezel));
+        const bend = t * t;
+        const k = (j * w + i) * 4;
+        px[k] = Math.round(127.5 - 127.5 * bend * nx);
+        px[k + 1] = Math.round(127.5 - 127.5 * bend * ny);
+        px[k + 2] = 128;
+        px[k + 3] = Math.round(255 * Math.max(0, Math.min(1, 0.5 - dist)));
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+    return canvas.toDataURL('image/png');
+  }
+
+  // Each glass surface gets an SVG filter as its backdrop filter. It softens what is
+  // behind the surface and bends it near the rim. Only Chromium browsers accept an
+  // SVG filter there; the others keep the blurred glass from the stylesheet.
+  const lensOn = REFRACTION && !!(navigator.userAgentData || window.chrome) && !media('(prefers-reduced-transparency: reduce)').matches;
+  let lensKey = '';
+
+  function applyRefraction() {
+    if (!lensOn) return;
+    const surfaces = panels
+      .map((el) => ({ el, w: el.offsetWidth, h: el.offsetHeight, bar: el.classList.contains('segmented') }))
+      .filter((s) => s.w > 40 && s.h > 40);
+    const key = surfaces.map((s) => s.w + 'x' + s.h).join('|');
+    if (key === lensKey) return;
+    lensKey = key;
+    const old = document.getElementById('lens-defs');
+    if (old) old.remove();
+    panels.forEach((el) => el.style.removeProperty('--bf'));
+    const NS = 'http://www.w3.org/2000/svg';
+    const make = (tag, attrs, parent) => {
+      const node = document.createElementNS(NS, tag);
+      for (const name in attrs) node.setAttribute(name, attrs[name]);
+      if (parent) parent.appendChild(node);
+      return node;
+    };
+    const svg = make('svg', { id: 'lens-defs', width: 0, height: 0, 'aria-hidden': 'true', style: 'position:absolute' });
+    // Surfaces of the same size share one filter.
+    const made = {};
+    surfaces.forEach((s) => {
+      s.id = 'lens-' + s.w + 'x' + s.h;
+      if (made[s.id]) return;
+      made[s.id] = true;
+      const filter = make('filter', { id: s.id, filterUnits: 'userSpaceOnUse', primitiveUnits: 'userSpaceOnUse', x: 0, y: 0, width: s.w, height: s.h, 'color-interpolation-filters': 'sRGB' }, svg);
+      make('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: s.bar ? 5 : 4, result: 'frost' }, filter);
+      make('feColorMatrix', { in: 'frost', type: 'saturate', values: 1.35, result: 'body' }, filter);
+      make('feImage', { href: lensMap(s.w, s.h, s.bar ? s.h / 2 : 28, s.bar ? 18 : 44), x: 0, y: 0, width: s.w, height: s.h, preserveAspectRatio: 'none', result: 'map' }, filter);
+      make('feDisplacementMap', { in: 'body', in2: 'map', scale: s.bar ? 44 : 120, xChannelSelector: 'R', yChannelSelector: 'G' }, filter);
+    });
+    document.body.appendChild(svg);
+    surfaces.forEach((s) => s.el.style.setProperty('--bf', 'url(#' + s.id + ')'));
+  }
+
+  // The lenses are rebuilt whenever a panel changes size, which includes the moment the data arrives.
+  if (lensOn && window.ResizeObserver) {
+    let lensTimer;
+    const observer = new ResizeObserver(() => {
+      clearTimeout(lensTimer);
+      lensTimer = setTimeout(applyRefraction, 150);
+    });
+    panels.forEach((el) => observer.observe(el));
+  }
+})();
+</script>
+<script>
+// ---------- Data: read log.json and fill in the headline and the three panels ----------
+(async function () {
+  const DAY = 864e5;
+  const $ = (id) => document.getElementById(id);
+  // Each game's icon is kept as a <template> in the page and copied in beside its title.
+  const icon = (name) => { const t = $('icon-' + name); return t ? t.content.cloneNode(true) : null; };
+
+  // Small DOM builder: el('div', { class: 'x' }, child, child)
+  function el(tag, props, ...kids) {
+    const node = document.createElement(tag);
+    for (const [k, v] of Object.entries(props || {})) {
+      if (v == null) continue;
+      if (k === 'class') node.className = v;
+      else if (k === 'style') node.style.cssText = v;
+      else node.setAttribute(k, v);
+    }
+    for (const kid of kids.flat()) if (kid != null) node.append(kid);
+    return node;
+  }
+
+  // Dates are handled as whole day numbers so time zones cannot shift them.
+  const dayNum = (s) => { const [y, m, d] = s.split('-').map(Number); return Date.UTC(y, m - 1, d) / DAY; };
+  const fmtDate = (n, opts) => new Date(n * DAY).toLocaleDateString('en-GB', Object.assign({ timeZone: 'UTC' }, opts));
+  const now = new Date();
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / DAY;
+
+  const toSec = (t) => { const [m, s] = String(t).split(':').map(Number); return m * 60 + (s || 0); };
+  const fmtTime = (sec) => { sec = Math.round(sec); return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); };
+  const isLoss = (v) => String(v).toUpperCase() === 'X';
+  const plural = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
+  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+  $('year').textContent = now.getFullYear();
+
+  let data;
+  try {
+    const res = await fetch('log.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error(res.status);
+    data = await res.json();
+  } catch (err) {
+    $('headline').textContent = 'The puzzle log could not be loaded.';
+    $('updated').textContent = 'Check that log.json sits next to this page and is valid JSON. The page has to be opened through a web server, not straight from disk.';
+    return;
+  }
+
+  // One entry per date. Later lines for the same date are merged into earlier ones.
+  const byDate = new Map();
+  for (const d of data.days || []) {
+    if (!d || !/^\d{4}-\d{2}-\d{2}$/.test(d.date)) continue;
+    byDate.set(d.date, Object.assign(byDate.get(d.date) || {}, d));
+  }
+  const days = [...byDate.values()].map((d) => Object.assign({ n: dayNum(d.date) }, d)).sort((a, b) => a.n - b.n);
+  const latest = days[days.length - 1];
+  const base = data.baseline || {};
+  const diff = data.sudokuDifficulty ? data.sudokuDifficulty + ' ' : '';
+  const when = !latest ? '' : latest.n === today ? 'today' : latest.n === today - 1 ? 'yesterday'
+    : 'on ' + fmtDate(latest.n, { day: 'numeric', month: 'long' });
+
+  // The date the baseline totals run up to. Daily entries should start the day after.
+  const asOf = /^\d{4}-\d{2}-\d{2}$/.test(base.asOf || '') ? dayNum(base.asOf) : null;
+
+  // Streaks break on a loss or on a skipped day. A run that starts on the first
+  // logged day continues the baseline streak, but only if that day follows the
+  // baseline date directly.
+  function streaks(entries, isWin, b) {
+    b = b || {};
+    let run = 0, longest = b.longestStreak || 0, prev = null;
+    entries.forEach((d, i) => {
+      if (!isWin(d)) run = 0;
+      else if (i === 0) run = ((asOf == null || d.n === asOf + 1) ? (b.currentStreak || 0) : 0) + 1;
+      else run = (d.n === prev + 1 && run > 0) ? run + 1 : 1;
+      longest = Math.max(longest, run);
+      prev = d.n;
+    });
+    if (!entries.length) return { current: (asOf == null || asOf >= today - 1) ? (b.currentStreak || 0) : 0, longest };
+    return { current: prev >= today - 1 ? run : 0, longest };
+  }
+
+  function facts(rows) {
+    return el('dl', null, rows.map(([k, v]) => el('div', null, el('dt', null, k), el('dd', null, String(v)))));
+  }
+
+  // ---------- Headline ----------
+  (function headline() {
+    const h1 = $('headline');
+    if (!latest) {
+      // No daily entries yet: lead with the totals carried in from the baseline.
+      const total = (game) => Object.values((base[game] || {}).counts || {}).reduce((sum, n) => sum + (Number(n) || 0), 0);
+      const w = total('wordle'), c = total('connections');
+      if (!w && !c) { h1.textContent = 'No puzzles logged yet.'; return; }
+      const lines = ["So far I've played"];
+      if (w) lines.push(plural(w, 'Wordle') + (c ? '' : '.'));
+      if (c) lines.push((w ? 'and ' : '') + plural(c, 'Connections game') + '.');
+      h1.replaceChildren(...lines.map((text) => el('span', null, text)));
+      if (asOf != null) $('updated').textContent = 'Totals up to ' + fmtDate(asOf, { day: 'numeric', month: 'long', year: 'numeric' }) + '. Daily results start with the next puzzle.';
+      return;
+    }
+    const parts = [];
+    if (latest.wordle != null) parts.push(isLoss(latest.wordle) ? { lose: 'Wordle' } : { win: 'Wordle in ' + latest.wordle });
+    if (latest.connections != null) {
+      const m = Number(latest.connections);
+      parts.push(isLoss(latest.connections) ? { lose: 'Connections' }
+        : { win: 'Connections with ' + (m === 0 ? 'no mistakes' : plural(m, 'mistake')) });
+    }
+    if (latest.sudoku != null) parts.push({ win: 'the ' + diff + 'Sudoku in ' + latest.sudoku });
+    if (!parts.length) { h1.textContent = 'Nothing logged ' + when + '.'; return; }
+    const allWon = parts.every((p) => p.win);
+    const phrases = parts.map((p) => allWon ? p.win : p.win ? 'solved ' + p.win : 'lost ' + p.lose);
+    const lead = cap(when) + ' I ' + (allWon ? 'solved ' : '');
+    const last = phrases.length - 1;
+    // "Today I solved" shares the first line; longer leads get a line of their own.
+    const ownLine = when !== 'today';
+    const lines = phrases.map((text, i) =>
+      (i === 0 && !ownLine ? lead : '') + (i === last && last > 0 ? 'and ' : '') + text + (i === last ? '.' : last > 1 ? ',' : ''));
+    if (ownLine) lines.unshift(lead.trim());
+    h1.replaceChildren(...lines.map((text) => el('span', null, text)));
+    $('updated').textContent = 'Last entry: ' + fmtDate(latest.n, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + '.';
+  })();
+
+  // ---------- Wordle and Connections: games by result ----------
+  function resultGame(id, title, field, keys, label, keyWidth, summarise) {
+    const b = base[field] || {};
+    const counts = {};
+    keys.forEach((k) => { counts[k] = Number((b.counts || {})[k]) || 0; });
+    const played = days.filter((d) => d[field] != null);
+    played.forEach((d) => { const k = isLoss(d[field]) ? 'X' : String(d[field]); if (k in counts) counts[k] += 1; });
+    const total = keys.reduce((sum, k) => sum + counts[k], 0);
+    const wins = total - counts.X;
+    const s = streaks(played, (d) => !isLoss(d[field]), b);
+    const nowKey = latest && latest[field] != null ? (isLoss(latest[field]) ? 'X' : String(latest[field])) : null;
+    const max = Math.max(1, ...keys.map((k) => counts[k]));
+
+    // Wordle keeps its misses in the totals but, like the game itself, does not chart them.
+    const rows = keys.filter((k) => k !== 'X' || keyWidth > 12).map((k) => el('div', { class: 'row', title: label(k) + ': ' + plural(counts[k], 'game') },
+      el('span', { class: 'key', style: 'width:' + keyWidth + 'px' }, k === 'X' && keyWidth > 12 ? 'Lost' : k),
+      el('div', { class: 'track' },
+        counts[k] ? el('div', { class: 'bar' + (k === nowKey ? ' now' : ''), style: 'width:' + (counts[k] / max * 100).toFixed(1) + '%' }) : null,
+        el('span', null, String(counts[k])))));
+
+    $(id).replaceChildren(
+      el('header', null, el('div', { class: 'title' }, icon(id), el('h2', null, title)), el('p', { class: 'muted' }, summarise(counts, total, wins))),
+      el('div', { class: 'chart bars', role: 'img', 'aria-label': title + ' games by result. ' + keys.map((k) => label(k) + ': ' + counts[k]).join(', ') + '.' }, rows),
+      facts([
+        ['Played', total],
+        ['Win rate', total ? Math.round(wins / total * 100) + '%' : 'n/a'],
+        ['Current streak', s.current],
+        ['Longest streak', s.longest],
+      ]));
+  }
+
+  resultGame('wordle', 'Wordle', 'wordle', ['1', '2', '3', '4', '5', '6', 'X'],
+    (k) => k === 'X' ? 'Missed' : plural(Number(k), 'guess').replace('guesss', 'guesses'), 10,
+    (counts, total, wins) => {
+      let text = '';
+      if (latest) {
+        text = latest.wordle == null ? 'Not played ' + when + '.'
+          : isLoss(latest.wordle) ? 'Missed the word ' + when + '.'
+          : cap(plural(Number(latest.wordle), 'guess').replace('guesss', 'guesses')) + ' ' + when + '.';
+      }
+      if (wins) {
+        const sum = ['1', '2', '3', '4', '5', '6'].reduce((acc, k) => acc + Number(k) * counts[k], 0);
+        text += ' The average over ' + plural(total, 'game') + ' is ' + (sum / wins).toFixed(1) + '.';
+      }
+      return text.trim();
+    });
+
+  resultGame('connections', 'Connections', 'connections', ['0', '1', '2', '3', 'X'],
+    (k) => k === 'X' ? 'Lost' : k === '0' ? 'No mistakes' : plural(Number(k), 'mistake'), 26,
+    (counts, total) => {
+      let text = '';
+      if (latest) {
+        const m = Number(latest.connections);
+        text = latest.connections == null ? 'Not played ' + when + '.'
+          : isLoss(latest.connections) ? 'Lost ' + when + '.'
+          : (m === 0 ? 'No mistakes' : cap(plural(m, 'mistake'))) + ' ' + when + '.';
+      }
+      if (total) text += ' ' + counts['0'] + ' of ' + plural(total, 'game') + ' had none at all.';
+      return text.trim();
+    });
+
+  // ---------- Sudoku: solve time over the last seven days ----------
+  (function sudoku() {
+    const b = base.sudoku || {};
+    const solved = days.filter((d) => d.sudoku != null).map((d) => Object.assign({ sec: toSec(d.sudoku) }, d));
+    const end = latest ? latest.n : today;
+    const week = [];
+    for (let n = end - 6; n <= end; n++) week.push({ n, entry: solved.find((d) => d.n === n) || null });
+    const inWeek = week.filter((w) => w.entry).map((w) => w.entry);
+    const avg = inWeek.length ? inWeek.reduce((sum, d) => sum + d.sec, 0) / inWeek.length : null;
+    const all = solved.map((d) => d.sec).concat(b.fastest ? [toSec(b.fastest)] : []);
+    const s = streaks(solved, () => true, b);
+    const top = Math.max(10, Math.ceil(Math.max(0, ...inWeek.map((d) => d.sec)) / 600) * 10); // axis top, in minutes
+    const mine = latest && latest.sudoku != null ? toSec(latest.sudoku) : null;
+
+    let summary;
+    if (mine == null) {
+      summary = latest ? 'No Sudoku logged ' + when + '.' : 'No Sudoku logged yet.';
+      if (avg != null) summary += ' The weekly average is ' + fmtTime(avg) + '.';
+    } else {
+      summary = when === 'today' ? "Today's " + diff + 'puzzle took ' : when === 'yesterday' ? "Yesterday's " + diff + 'puzzle took '
+        : 'The ' + diff + 'puzzle ' + when + ' took ';
+      summary += fmtTime(mine);
+      if (inWeek.length > 1) {
+        const a = Math.round(avg);
+        summary += mine < a ? ', under the weekly average of ' + fmtTime(avg) : mine > a ? ', over the weekly average of ' + fmtTime(avg) : ', exactly the weekly average';
+      }
+      summary += '.';
+    }
+
+    const columns = week.map((w) => {
+      const isNow = latest && w.n === latest.n;
+      const name = fmtDate(w.n, { weekday: 'long' });
+      if (!w.entry) return el('div', { class: 'col', title: name + ': not logged' });
+      const height = Math.max(2, Math.round(w.entry.sec / 60 / top * 120));
+      return el('div', { class: 'col' + (isNow ? ' now' : ''), title: name + ': ' + fmtTime(w.entry.sec) },
+        isNow ? el('span', { class: 'val' }, fmtTime(w.entry.sec)) : null,
+        el('div', { class: 'bar', style: 'height:' + height + 'px' }));
+    });
+
+    $('sudoku').replaceChildren(
+      el('header', null, el('div', { class: 'title' }, icon('sudoku'), el('h2', null, 'Sudoku')), el('p', { class: 'muted' }, summary)),
+      el('div', { class: 'chart cols', role: 'img', 'aria-label': 'Sudoku solve time over the last seven days. ' + week.map((w) => fmtDate(w.n, { weekday: 'long' }) + ': ' + (w.entry ? fmtTime(w.entry.sec) : 'not logged')).join(', ') + '.' },
+        el('div', { class: 'plotrow' },
+          el('div', { class: 'ticks' }, el('span', null, top + 'm'), el('span', null, top / 2 + 'm'), el('span', null, '0')),
+          el('div', { class: 'plot' },
+            el('div', { class: 'grid', style: 'top:0' }),
+            el('div', { class: 'grid', style: 'top:60px' }),
+            el('div', { class: 'grid base' }),
+            el('div', { class: 'columns' }, columns))),
+        el('div', { class: 'days' }, week.map((w) => el('span', { class: latest && w.n === latest.n ? 'now' : null }, fmtDate(w.n, { weekday: 'short' }))))),
+      facts([
+        ['Fastest ever', all.length ? fmtTime(Math.min(...all)) : 'n/a'],
+        ['7-day average', avg != null ? fmtTime(avg) : 'n/a'],
+        ['Solved', (b.solved || 0) + solved.length],
+        ['Current streak', s.current],
+      ]));
+  })();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "sudokuDifficulty": "hard",
+  "baseline": {
+    "asOf": "2026-10-08",
+    "wordle": {
+      "counts": { "1": 0, "2": 13, "3": 82, "4": 153, "5": 124, "6": 45, "X": 17 },
+      "currentStreak": 7,
+      "longestStreak": 23
+    },
+    "connections": {
+      "counts": { "0": 16, "1": 9, "2": 7, "3": 10, "X": 48 },
+      "currentStreak": 1,
+      "longestStreak": 4
+    }
+  },
+  "days": []
+}
