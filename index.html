@@ -343,9 +343,6 @@ footer { padding: 40px 0 48px; font-size: 0.875rem; text-align: center; color: v
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass { background: var(--solid); }
 }
-@media (prefers-reduced-transparency: reduce) {
-  .glass, .segmented { background: var(--solid); -webkit-backdrop-filter: none; backdrop-filter: none; }
-}
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .glass, .thumb, .seg, .links a, .mode, .mode i { animation: none; transition: none; }
@@ -537,7 +534,7 @@ footer { padding: 40px 0 48px; font-size: 0.875rem; text-align: center; color: v
   // Each glass surface gets an SVG filter as its backdrop filter. It softens what is
   // behind the surface and bends it near the rim. Only Chromium browsers accept an
   // SVG filter there; the others keep the blurred glass from the stylesheet.
-  const lensOn = REFRACTION && !!(navigator.userAgentData || window.chrome) && !media('(prefers-reduced-transparency: reduce)').matches;
+  const lensOn = REFRACTION && !!(navigator.userAgentData || window.chrome);
   let lensKey = '';
 
   function applyRefraction() {
